@@ -1,0 +1,41 @@
+name: Build Windows Release
+
+on:
+  workflow_dispatch: # Allows manual trigger from the GitHub web UI
+  push:
+    branches: [ main ] # Runs automatically when you push to main
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      # 1. Download repository source code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install Flutter on the Windows runner
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # 3. Ensure Windows desktop support is active
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      # 4. Fetch packages
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Compile the Windows release build
+      - name: Build Windows Executable
+        run: flutter build windows --release
+
+      # 6. Upload the entire compiled release folder as an artifact
+      - name: Upload Windows Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WhatsAppViewer-Windows-x64
+          path: build/windows/x64/runner/Release/
